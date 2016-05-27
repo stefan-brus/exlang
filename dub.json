@@ -1,0 +1,8 @@
+{
+	"name": "exlang",
+	"description": "Experimental language",
+	"copyright": "Copyright © 2016, Stefan Brus",
+	"authors": ["Stefan Brus"],
+	"dependencies": {
+	}
+}
