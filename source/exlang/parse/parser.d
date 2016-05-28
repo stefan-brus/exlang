@@ -276,7 +276,7 @@ class Parser
                     throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", tok.str, to!string(next_type)));
             }
 
-            case IntLit: switch ( this.lexer.peekToken().type )
+            case IntLit: switch ( next_type )
             {
                 case Semicolon:
                     return new IntExpression(to!ulong(tok.str));
@@ -284,6 +284,9 @@ class Parser
                 default:
                     throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", tok.str, to!string(next_type)));
             }
+
+            case SingleQuote:
+                return this.parseCharLitExpression();
 
             case Plus:
                 enforce!ParseException(left !is null, "Invalid token: Plus");
@@ -346,6 +349,59 @@ class Parser
         auto right = this.parseExpression();
 
         return new AddExpression(left, right);
+    }
+
+    /**
+     * Parse a character literal expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private CharLitExpression parseCharLitExpression ( )
+    {
+        import std.exception;
+        import std.format;
+
+        // This may seem a bit redundant but is necessary to escape things like letters
+        enum ESCAPABLE_CHARACTERS = [
+            '\'': '\'',
+            '"': '\"',
+            '\\': '\\',
+            'n': '\n',
+            'r': '\r',
+            't': '\t',
+            'b': '\b',
+            'f': '\f',
+            'v': '\v',
+            '0': '\0'
+        ];
+
+        CharLitExpression result;
+
+        auto tok1 = this.lexer.popToken();
+
+        if ( tok1.type == TokType.Backslash )
+        {
+            auto tok2 = this.lexer.popToken();
+
+            enforce!ParseException(tok2.str.length == 1, "Character literal expression must be 2 characters if escaped with backslash");
+            enforce!ParseException(tok2.str[0] in ESCAPABLE_CHARACTERS, format("%s is not an escapable character", tok2.str));
+
+            result = new CharLitExpression(ESCAPABLE_CHARACTERS[tok2.str[0]]);
+        }
+        else
+        {
+            enforce!ParseException(tok1.str.length == 1, "Character literal expression must be 1 character if not escaped with backslash");
+            result = new CharLitExpression(tok1.str[0]);
+        }
+
+        this.expect!(TokType.SingleQuote)();
+
+        return result;
     }
 
     /**

@@ -66,6 +66,7 @@ class Value
     private union InternalVal
     {
         ulong integer;
+        char character;
     }
     ///ditto
     private InternalVal internal_val;
@@ -99,6 +100,11 @@ class Value
             assert(this.type.ident == "Int");
             this.internal_val.integer = val;
         }
+        else static if ( is(T == char) )
+        {
+            assert(this.type.ident == "Char");
+            this.internal_val.character = val;
+        }
         else
         {
             static assert(false, "Unknown value type: " ~ T.stringof);
@@ -121,6 +127,11 @@ class Value
         {
             assert(this.type.ident == "Int");
             return this.internal_val.integer;
+        }
+        else static if ( is(T == char) )
+        {
+            assert(this.type.ident == "Char");
+            return this.internal_val.character;
         }
         else
         {

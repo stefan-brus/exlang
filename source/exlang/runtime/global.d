@@ -25,9 +25,11 @@ void setupGlobal ( Env env )
     // The built in types
     env["Void"] = new Type("Void");
     env["Int"] = new Type("Int");
+    env["Char"] = new Type("Char");
 
     // The intrinsic functions
     env["printnum"] = new IntrinsicFunction("printnum", Builtin.printnum);
+    env["printchr"] = new IntrinsicFunction("printchr", Builtin.printchr);
 }
 
 /**
@@ -71,6 +73,38 @@ private struct Builtin
 
     static Intrinsic printnum;
 
+    /**
+     * printchr
+     *
+     * Prints the given Char
+     *
+     * Params:
+     *      args = The arguments
+     *
+     * Returns:
+     *      Void
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    static Value printchr_impl ( Value[] args )
+    {
+        import exlang.interpreter.exception;
+
+        import std.exception;
+        import std.stdio;
+
+        enforce!EvalException(args.length == 1, "printchr: expects 1 argument");
+        enforce!EvalException(args[0].type.ident == "Char", "printchr: argument must be Char");
+
+        writefln("%c", args[0].get!char);
+
+        return cast(Value)Value.VOID;
+    }
+
+    static Intrinsic printchr;
+
     static this ( )
     {
         import exlang.symtab.symbol;
@@ -78,5 +112,6 @@ private struct Builtin
         import std.functional;
 
         printnum = new Intrinsic("printnum", new Type("Void"), [new Type("Int")], toDelegate(&printnum_impl));
+        printchr = new Intrinsic("printchr", new Type("Void"), [new Type("Char")], toDelegate(&printchr_impl));
     }
 }

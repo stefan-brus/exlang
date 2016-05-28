@@ -39,6 +39,8 @@ enum TokType
     Semicolon,
     Equals,
     Plus,
+    SingleQuote,
+    Backslash,
 
     /**
      * Reserved words
@@ -66,7 +68,9 @@ enum TokType[string] RES_OPS = [
     ":": TokType.Colon,
     ";": TokType.Semicolon,
     "=": TokType.Equals,
-    "+": TokType.Plus
+    "+": TokType.Plus,
+    "'": TokType.SingleQuote,
+    "\\": TokType.Backslash
 ];
 
 /**

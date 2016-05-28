@@ -1,0 +1,13 @@
+// Example usages of the Char type and printchr function
+def main () Void:
+  let c = getQChar();
+  printchrTwice(c);
+  printchrTwice('\n');
+  printchrTwice('\\');
+
+def printchrTwice(c : Char) Void:
+  printchr(c);
+  printchr(c);
+
+def getQChar() Char:
+  ret 'q';

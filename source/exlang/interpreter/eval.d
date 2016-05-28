@@ -255,6 +255,10 @@ class Evaluator
         {
             return this.evalIntExpression(int_exp, env);
         }
+        else if ( auto char_exp = cast(AnnCharLitExpression)exp )
+        {
+            return this.evalCharLitExpression(char_exp, env);
+        }
         else
         {
             throw new EvalException("Unknown expression type");
@@ -384,6 +388,27 @@ class Evaluator
         import exlang.symtab.symbol;
 
         auto result = new Value(cast(Type)Env.global["Int"]);
+        result.set(exp.value);
+
+        return result;
+    }
+
+    /**
+     * Evaluate a character literal expression
+     *
+     * Params:
+     *      exp = The expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The expression value
+     */
+
+    private Value evalCharLitExpression ( AnnCharLitExpression exp, Env env )
+    {
+        import exlang.symtab.symbol;
+
+        auto result = new Value(cast(Type)Env.global["Char"]);
         result.set(exp.value);
 
         return result;

@@ -334,6 +334,10 @@ class Semantic
         {
             return this.analyzeIntExp(int_exp, env);
         }
+        else if ( auto char_exp = cast(CharLitExpression)exp )
+        {
+            return this.analyzeCharLitExp(char_exp, env);
+        }
         else
         {
             throw new SemanticException(format("Unexpected expression: %s", exp.toString()));
@@ -479,6 +483,22 @@ class Semantic
     private AnnIntExpression analyzeIntExp ( IntExpression exp, Env env )
     {
         return new AnnIntExpression(exp.value);
+    }
+
+    /**
+     * Analyze a char lit expression
+     *
+     * Params:
+     *      exp = The absyn expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated expression
+     */
+
+    private AnnCharLitExpression analyzeCharLitExp ( CharLitExpression exp, Env env )
+    {
+        return new AnnCharLitExpression(exp.value);
     }
 
     /**

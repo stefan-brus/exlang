@@ -193,3 +193,42 @@ class IntExpression : Expression
         return to!string(this.value);
     }
 }
+
+/**
+ * Character liteeral expression
+ */
+
+class CharLitExpression : Expression
+{
+    /**
+     * The value
+     */
+
+    char value;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      value = The value
+     */
+
+    this ( char value )
+    {
+        this.value = value;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        import std.conv;
+
+        return to!string(this.value);
+    }
+}

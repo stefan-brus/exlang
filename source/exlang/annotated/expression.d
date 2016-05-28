@@ -166,3 +166,33 @@ class AnnIntExpression : AnnExpression
     }
 }
 
+
+
+/**
+ * Annotated character literal expression
+ */
+
+class AnnCharLitExpression : AnnExpression
+{
+    /**
+     * The value
+     */
+
+    char value;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      value = The value
+     */
+
+    this ( char value )
+    {
+        import exlang.symtab.env;
+
+        super(cast(Type)Env.global["Char"]);
+
+        this.value = value;
+    }
+}
