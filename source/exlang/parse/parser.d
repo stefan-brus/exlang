@@ -335,6 +335,9 @@ class Parser
             case SingleQuote:
                 return this.parseCharLitExpression();
 
+            case Quote:
+                return this.parseStringLitExpression();
+
             case Plus:
                 enforce!ParseException(left !is null, "Invalid token: Plus");
                 return this.parseAddExpression(left);
@@ -432,11 +435,11 @@ class Parser
 
         CharLitExpression result;
 
-        auto tok1 = this.lexer.popToken();
+        auto tok1 = this.lexer.popToken(false);
 
         if ( tok1.type == TokType.Backslash )
         {
-            auto tok2 = this.lexer.popToken();
+            auto tok2 = this.lexer.popToken(false);
 
             enforce!ParseException(tok2.str.length == 1, "Character literal expression must be 2 characters if escaped with backslash");
             enforce!ParseException(tok2.str[0] in ESCAPABLE_CHARACTERS, format("%s is not an escapable character", tok2.str));
@@ -452,6 +455,36 @@ class Parser
         this.expect!(TokType.SingleQuote)();
 
         return result;
+    }
+
+    /**
+     * Parse a string literal expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private ListExpression parseStringLitExpression ( )
+    {
+        string val_buf;
+        while ( this.lexer.peekToken(false).type != TokType.Quote )
+        {
+            auto tok = this.lexer.popToken(false);
+            val_buf ~= tok.str;
+        }
+
+        Expression[] exps;
+        foreach ( c; val_buf )
+        {
+            exps ~= new CharLitExpression(c);
+        }
+
+        this.expect!(TokType.Quote);
+
+        return new ListExpression(exps);
     }
 
     /**

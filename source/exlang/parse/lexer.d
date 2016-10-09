@@ -78,6 +78,9 @@ class Lexer
     /**
      * Peek at the next token
      *
+     * Params:
+     *      consume = If true, consume whitespace and comments
+     *
      * Returns:
      *      The next token
      *
@@ -85,16 +88,19 @@ class Lexer
      *      LexerException on error
      */
 
-    Token peekToken ( )
+    Token peekToken ( bool consume = true )
     {
         auto prev_pos = this.pos;
         scope ( exit ) this.pos = prev_pos;
-        return this.popToken();
+        return this.popToken(consume);
     }
 
     /**
      * Consume the next token
      *
+     * Params:
+     *      consume = If true, consume whitespace and comments
+     *
      * Returns:
      *      The next token
      *
@@ -102,7 +108,7 @@ class Lexer
      *      LexerException on error
      */
 
-    Token popToken ( )
+    Token popToken ( bool consume = true )
     out ( tok )
     {
         debug ( LexerDebug )
@@ -118,9 +124,20 @@ class Lexer
         while ( this.pos < this.str.length )
         {
             // Consume whitespace and comments
-            if ( this.consumeWhitespace() || this.consumeComments() )
+            if ( consume && (this.consumeWhitespace() || this.consumeComments()) )
             {
                 continue;
+            }
+            // Parse whitespace as tokens
+            else if ( !consume )
+            {
+                auto ws_tok = this.findWhitespace();
+                if ( ws_tok !is null )
+                {
+                    assert(ws_tok in WS_TOKS);
+                    this.pos += ws_tok.length;
+                    return Token(WS_TOKS[ws_tok], ws_tok);
+                }
             }
 
             // Look for reserved operators/symbols
@@ -163,6 +180,29 @@ class Lexer
 
         this.pos = this.str.length;
         return Token(TokType.EOF);
+    }
+
+    /**
+     * Find the next whitespace tokens
+     *
+     * Returns:
+     *      The string representation of the whitespace, or null
+     */
+
+    private string findWhitespace ( )
+    in
+    {
+        assert(this.pos < this.str.length);
+    }
+    body
+    {
+        auto ws_str = this.str[this.pos .. this.pos + 1];
+        if ( ws_str in WS_TOKS )
+        {
+            return ws_str;
+        }
+
+        return null;
     }
 
     /**

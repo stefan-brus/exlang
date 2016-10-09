@@ -41,7 +41,9 @@ enum TokType
     Semicolon,
     Equals,
     Plus,
+    Slash,
     SingleQuote,
+    Quote,
     Backslash,
 
     /**
@@ -51,6 +53,15 @@ enum TokType
     Let,
     Def,
     Ret,
+
+    /**
+     * Whitespace
+     */
+
+    WSSPace,
+    WSTab,
+    WSNewline,
+    WSRet,
 
     /**
      * End of input
@@ -73,7 +84,9 @@ enum TokType[string] RES_OPS = [
     ";": TokType.Semicolon,
     "=": TokType.Equals,
     "+": TokType.Plus,
+    "/": TokType.Slash,
     "'": TokType.SingleQuote,
+    "\"": TokType.Quote,
     "\\": TokType.Backslash
 ];
 
@@ -85,6 +98,17 @@ enum TokType[string] RES_WORDS = [
     "let": TokType.Let,
     "def": TokType.Def,
     "ret": TokType.Ret
+];
+
+/**
+ * Whitespace token string table
+ */
+
+enum TokType[string] WS_TOKS = [
+    " ": TokType.WSSPace,
+    "\t": TokType.WSTab,
+    "\n": TokType.WSNewline,
+    "\r": TokType.WSRet
 ];
 
 /**

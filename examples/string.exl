@@ -1,0 +1,15 @@
+// Example usages of strings and the print function
+def main() Void:
+  let str = "Hello there";
+  print(str);
+  let str2 = getString();
+  print(str2);
+  printStrings(str, str2);
+  print(['L', 'i', 's', 't', ' ', 'o', 'f', ' ', 'c', 'h', 'a', 'r', 's']);
+
+def getString() String:
+  ret "Testing strings";
+
+def printStrings(str1 : String, str2 : String) Void:
+  print(str1);
+  print(str2);

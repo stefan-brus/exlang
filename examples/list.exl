@@ -1,5 +1,5 @@
 // Example usages of lists and the printlst function
-def main () Void:
+def main() Void:
   let lst = [0 + 1, 2, 1 + 2, 4];
   printlst(lst);
   let lst2 = getList();

@@ -159,11 +159,11 @@ class Semantic
 
                 if ( ret_stmt is null )
                 {
-                    enforce!SemanticException(decl.type_id == "Void", format("Last statement of function %s must be a ret statement, got: %s", decl.ident, stmt.toString()));
+                    enforce!SemanticException(type == parent["Void"], format("Last statement of function %s must be a ret statement, got: %s", decl.ident, stmt.toString()));
                 }
                 else
                 {
-                    enforce!SemanticException(ret_stmt.exp.type.ident == decl.type_id, format("Ret statement of function %s must be of type %s", decl.ident, decl.type_id));
+                    enforce!SemanticException(ret_stmt.exp.type.ident == type.ident, format("Ret statement of function %s must be of type %s", decl.ident, decl.type_id));
                 }
             }
 
