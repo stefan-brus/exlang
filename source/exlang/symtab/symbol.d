@@ -49,6 +49,33 @@ class Type : Symbol
 }
 
 /**
+ * Array type symbol
+ */
+
+class ArrayType : Type
+{
+    /**
+     * The internal type
+     */
+
+    Type internal;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      internal = The internal type
+     */
+
+    this ( Type internal )
+    {
+        super("[" ~ internal.ident ~ "]");
+
+        this.internal = internal;
+    }
+}
+
+/**
  * Variable symbol
  */
 

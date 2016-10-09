@@ -162,4 +162,25 @@ class Env
     }
 
     alias opIndexAssign = set;
+
+    /**
+     * Create a symbol if it doesn't already exist
+     *
+     * Params:
+     *      ident = The identifier
+     *      val = Expression to create the symbol if it doesn't exist
+     *
+     * Returns:
+     *      The symbol
+     */
+
+    Symbol getOrCreate ( string ident, lazy Symbol val )
+    {
+        if ( !this.exists(ident) )
+        {
+            this.set(val, ident);
+        }
+
+        return this.lookup(ident);
+    }
 }

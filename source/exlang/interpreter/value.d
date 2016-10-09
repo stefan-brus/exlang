@@ -67,6 +67,7 @@ class Value
     {
         ulong integer;
         char character;
+        Value[] list;
     }
     ///ditto
     private InternalVal internal_val;
@@ -105,6 +106,11 @@ class Value
             assert(this.type.ident == "Char");
             this.internal_val.character = val;
         }
+        else static if ( is(T == Value[]) )
+        {
+            assert(this.type.ident[0] == '[');
+            this.internal_val.list = val;
+        }
         else
         {
             static assert(false, "Unknown value type: " ~ T.stringof);
@@ -132,6 +138,11 @@ class Value
         {
             assert(this.type.ident == "Char");
             return this.internal_val.character;
+        }
+        else static if (is(T == Value[]) )
+        {
+            assert(this.type.ident[0] == '[');
+            return this.internal_val.list;
         }
         else
         {

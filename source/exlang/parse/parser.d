@@ -110,13 +110,33 @@ class Parser
         {
             auto arg_ident = this.expect!(TokType.Identifier)().str;
             this.expect!(TokType.Colon)();
-            auto arg_type = this.expect!(TokType.Identifier)().str;
+
+            string arg_type;
+            if ( this.lexer.peekToken().type == TokType.LBracket )
+            {
+                arg_type = this.parseListType();
+            }
+            else
+            {
+                arg_type = this.expect!(TokType.Identifier)().str;
+            }
+
             args ~= new ArgDeclaration(arg_ident, arg_type);
             if ( this.lexer.peekToken().type != TokType.RParen ) this.expect!(TokType.Comma)();
         }
 
         this.expect!(TokType.RParen)();
-        auto type_id = this.expect!(TokType.Identifier)().str;
+
+        string type_id;
+        if ( this.lexer.peekToken().type == TokType.LBracket )
+        {
+            type_id = this.parseListType();
+        }
+        else
+        {
+            type_id = this.expect!(TokType.Identifier)().str;
+        }
+
         this.expect!(TokType.Colon)();
 
         Statement[] stmts;
@@ -128,6 +148,27 @@ class Parser
         }
 
         return new FuncDeclaration(ident, type_id, args, stmts);
+    }
+
+    /**
+     * Helper function to parse a list type
+     *
+     * Returns:
+     *      The list type string
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private string parseListType ( )
+    {
+        import std.format;
+
+        this.expect!(TokType.LBracket)();
+        auto type_str = this.expect!(TokType.Identifier)().str;
+        this.expect!(TokType.RBracket)();
+
+        return format("[%s]", type_str);
     }
 
     /**
@@ -251,12 +292,12 @@ class Parser
         import std.format;
 
         auto tok = this.lexer.popToken();
-        auto next_type = this.lexer.peekToken().type;
+        auto next = this.lexer.peekToken();
         Expression result;
 
         with ( TokType ) switch ( tok.type )
         {
-            case Identifier: switch ( next_type )
+            case Identifier: switch ( next.type )
             {
                 // Expression terminated
                 case Comma:
@@ -273,16 +314,22 @@ class Parser
                     return this.parseExpression(new IdentExpression(tok.str));
 
                 default:
-                    throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", tok.str, to!string(next_type)));
+                    throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", next.str, to!string(next.type)));
             }
 
-            case IntLit: switch ( next_type )
+            case IntLit: switch ( next.type )
             {
                 case Semicolon:
+                case Comma:
+                case RBracket:
                     return new IntExpression(to!ulong(tok.str));
 
+                // Binary expressions
+                case Plus:
+                    return this.parseExpression(new IntExpression(to!ulong(tok.str)));
+
                 default:
-                    throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", tok.str, to!string(next_type)));
+                    throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", next.str, to!string(next.type)));
             }
 
             case SingleQuote:
@@ -292,8 +339,11 @@ class Parser
                 enforce!ParseException(left !is null, "Invalid token: Plus");
                 return this.parseAddExpression(left);
 
+            case LBracket:
+                return this.parseListExpression();
+
             default:
-                throw new ParseException(format("Invalid expression token '%s' of type %s", tok.str, to!string(next_type)));
+                throw new ParseException(format("Invalid expression token '%s' of type %s", next.str, to!string(next.type)));
         }
     }
 
@@ -402,6 +452,31 @@ class Parser
         this.expect!(TokType.SingleQuote)();
 
         return result;
+    }
+
+    /**
+     * Parse a list expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private ListExpression parseListExpression ( )
+    {
+        Expression[] exps;
+        while ( this.lexer.peekToken().type != TokType.RBracket )
+        {
+            exps ~= this.parseExpression();
+            if ( this.lexer.peekToken().type != TokType.Comma ) break;
+            this.lexer.popToken();
+        }
+
+        this.expect!(TokType.RBracket);
+
+        return new ListExpression(exps);
     }
 
     /**

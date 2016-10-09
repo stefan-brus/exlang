@@ -166,8 +166,6 @@ class AnnIntExpression : AnnExpression
     }
 }
 
-
-
 /**
  * Annotated character literal expression
  */
@@ -194,5 +192,36 @@ class AnnCharLitExpression : AnnExpression
         super(cast(Type)Env.global["Char"]);
 
         this.value = value;
+    }
+}
+
+/**
+ * Annotated list expression
+ */
+
+class AnnListExpression : AnnExpression
+{
+    /**
+     * The expressions of the list
+     */
+
+    AnnExpression[] exps;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      type = The type contained in the list
+     *      exps = The expressions of the list
+     */
+
+    this ( Type type, AnnExpression[] exps )
+    {
+        import exlang.symtab.env;
+
+        auto list_type = "[" ~ type.ident ~ "]";
+        super(cast(ArrayType)Env.global.getOrCreate(list_type, new ArrayType(cast(Type)Env.global[type.ident])));
+
+        this.exps = exps;
     }
 }

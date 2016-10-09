@@ -338,6 +338,10 @@ class Semantic
         {
             return this.analyzeCharLitExp(char_exp, env);
         }
+        else if ( auto list_exp = cast(ListExpression)exp )
+        {
+            return this.analyzeListExp(list_exp, env);
+        }
         else
         {
             throw new SemanticException(format("Unexpected expression: %s", exp.toString()));
@@ -499,6 +503,51 @@ class Semantic
     private AnnCharLitExpression analyzeCharLitExp ( CharLitExpression exp, Env env )
     {
         return new AnnCharLitExpression(exp.value);
+    }
+
+    /**
+     * Analyze a list expression
+     *
+     * Params:
+     *      exp = The absyn expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated expression
+     *
+     * Throws:
+     *      SemanticException on semantic error
+     */
+
+    private AnnListExpression analyzeListExp ( ListExpression exp, Env env )
+    {
+        import exlang.symtab.symbol;
+
+        import std.exception;
+
+        // TODO: Implement empty list expressions
+        enforce!SemanticException(exp.exps.length > 0, "Empty list expressions not implemented");
+
+        Type type;
+        AnnExpression[] ann_exps;
+
+        foreach ( i, internal; exp.exps )
+        {
+            auto ann_internal = this.analyzeExpression(internal, env);
+
+            if ( i == 0 )
+            {
+                type = ann_internal.type;
+            }
+            else
+            {
+                enforce!SemanticException(ann_internal.type.ident == type.ident, "List expressions must be of the same type, got %s", exp.toString());
+            }
+
+            ann_exps ~= ann_internal;
+        }
+
+        return new AnnListExpression(type, ann_exps);
     }
 
     /**

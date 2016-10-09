@@ -259,6 +259,10 @@ class Evaluator
         {
             return this.evalCharLitExpression(char_exp, env);
         }
+        else if ( auto list_exp = cast(AnnListExpression)exp )
+        {
+            return this.evalListExpression(list_exp, env);
+        }
         else
         {
             throw new EvalException("Unknown expression type");
@@ -410,6 +414,43 @@ class Evaluator
 
         auto result = new Value(cast(Type)Env.global["Char"]);
         result.set(exp.value);
+
+        return result;
+    }
+
+    /**
+     * Evaluate a list expression
+     *
+     * Params:
+     *      exp = The expression
+     *      env = The environment
+     *
+     * Returns:
+     *      The expression value
+     */
+
+    private Value evalListExpression ( AnnListExpression exp, Env env )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.format;
+
+        auto result = new Value(exp.type);
+        auto internal_type = (cast(ArrayType)exp.type).internal;
+        Value[] internal_vals;
+
+        foreach ( internal_exp; exp.exps )
+        {
+            auto val = this.evalExpression(internal_exp, env);
+
+            enforce!EvalException(val.type == internal_type, format("Wrong type for expression %s, expected %s", internal_exp, internal_type.ident));
+
+            internal_vals ~= val;
+        }
+
+        result.set(internal_vals);
 
         return result;
     }

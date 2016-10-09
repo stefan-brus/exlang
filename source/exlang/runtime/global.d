@@ -30,6 +30,7 @@ void setupGlobal ( Env env )
     // The intrinsic functions
     env["printnum"] = new IntrinsicFunction("printnum", Builtin.printnum);
     env["printchr"] = new IntrinsicFunction("printchr", Builtin.printchr);
+    env["printlst"] = new IntrinsicFunction("printlst", Builtin.printlst);
 }
 
 /**
@@ -105,6 +106,55 @@ private struct Builtin
 
     static Intrinsic printchr;
 
+    /**
+     * printlst
+     *
+     * Prints the given list
+     *
+     * TODO: Support internal types other than Int
+     *
+     * Params:
+     *      args = The arguments
+     *
+     * Returns:
+     *      Void
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    static Value printlst_impl ( Value[] args )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.stdio;
+
+        enforce!EvalException(args.length == 1, "printlst: expects 1 argument");
+        enforce!EvalException(cast(ArrayType)args[0].type !is null, "printlst: argument must be List");
+
+        write("[");
+
+        auto vals = args[0].get!(Value[]);
+        foreach ( i, val; vals )
+        {
+            enforce!EvalException(val.type.ident == "Int", "printlst: Currently only supports integer lists");
+            writef("%s", val.get!ulong);
+
+            if ( i < vals.length - 1 )
+            {
+                write(", ");
+            }
+        }
+
+        writeln("]");
+
+        return cast(Value)Value.VOID;
+    }
+
+    static Intrinsic printlst;
+
     static this ( )
     {
         import exlang.symtab.symbol;
@@ -113,5 +163,6 @@ private struct Builtin
 
         printnum = new Intrinsic("printnum", new Type("Void"), [new Type("Int")], toDelegate(&printnum_impl));
         printchr = new Intrinsic("printchr", new Type("Void"), [new Type("Char")], toDelegate(&printchr_impl));
+        printlst = new Intrinsic("printlst", new Type("Void"), [new ArrayType(new Type("Int"))], toDelegate(&printlst_impl));
     }
 }

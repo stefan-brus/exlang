@@ -195,7 +195,7 @@ class IntExpression : Expression
 }
 
 /**
- * Character liteeral expression
+ * Character literal expression
  */
 
 class CharLitExpression : Expression
@@ -230,5 +230,56 @@ class CharLitExpression : Expression
         import std.conv;
 
         return to!string(this.value);
+    }
+}
+
+/**
+ * List expression
+ */
+
+class ListExpression : Expression
+{
+    /**
+     * The list of expressions
+     */
+
+    Expression[] exps;
+
+    /**
+     * Constructor:
+     *
+     * Params:
+     *      exps = The expressions
+     */
+
+    this ( Expression[] exps )
+    {
+        this.exps = exps;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        auto result = "[";
+
+        foreach ( i, exp; this.exps )
+        {
+            result ~= exp.toString();
+
+            if ( i < this.exps.length - 1 )
+            {
+                result ~= ", ";
+            }
+        }
+
+        result ~= "]";
+
+        return result;
     }
 }

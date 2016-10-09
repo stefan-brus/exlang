@@ -1,0 +1,14 @@
+// Example usages of lists and the printlst function
+def main () Void:
+  let lst = [0 + 1, 2, 1 + 2, 4];
+  printlst(lst);
+  let lst2 = getList();
+  printlst(lst2);
+  printLists(lst, lst2);
+
+def getList() [Int]:
+  ret [5, 6, 3 + 4, 8];
+
+def printLists(lst1 : [Int], lst2 : [Int]) Void:
+  printlst(lst1);
+  printlst(lst2);

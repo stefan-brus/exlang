@@ -34,6 +34,8 @@ enum TokType
 
     LParen,
     RParen,
+    LBracket,
+    RBracket,
     Comma,
     Colon,
     Semicolon,
@@ -64,6 +66,8 @@ enum TokType
 enum TokType[string] RES_OPS = [
     "(": TokType.LParen,
     ")": TokType.RParen,
+    "[": TokType.LBracket,
+    "]": TokType.RBracket,
     ",": TokType.Comma,
     ":": TokType.Colon,
     ";": TokType.Semicolon,
