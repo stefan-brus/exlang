@@ -36,6 +36,9 @@ void setupGlobal ( Env env )
     env["printlst"] = new IntrinsicFunction("printlst", Builtin.printlst);
     env["print"] = new IntrinsicFunction("print", Builtin.print);
 
+    // IO functions
+    env["readln"] = new IntrinsicFunction("readln", Builtin.readln);
+
     // List functions
     env["appint"] = new IntrinsicFunction("appint", Builtin.appint);
     env["appstr"] = new IntrinsicFunction("appstr", Builtin.appstr);
@@ -204,6 +207,56 @@ private struct Builtin
     static Intrinsic print;
 
     /**
+     * readln
+     *
+     * Read a line from stdin
+     *
+     * Params:
+     *      args = The arguments
+     *
+     * Returns:
+     *      The input string
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    static Value readln_impl ( Value[] args )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.stdio;
+        import std.string;
+
+        enforce!EvalException(args.length == 0, "readln: expects 0 arguments");
+
+        try
+        {
+            auto str = readln().strip();
+            auto result = new Value(cast(Type)Env.global["String"]);
+            Value[] result_vals;
+
+            foreach ( char c; str )
+            {
+                auto val = new Value(cast(Type)Env.global["Char"]);
+                val.set(c);
+                result_vals ~= val;
+            }
+
+            result.set(result_vals);
+            return result;
+        }
+        catch ( Exception e )
+        {
+            throw new EvalException("readln: IO error: " ~ e.msg);
+        }
+    }
+
+    static Intrinsic readln;
+
+    /**
      * appint
      *
      * Append two integer lists
@@ -224,7 +277,6 @@ private struct Builtin
         import exlang.symtab.symbol;
 
         import std.exception;
-        import std.stdio;
 
         enforce!EvalException(args.length == 2, "appint: expects 2 arguments");
         enforce!EvalException(args[0].type.ident == "[Int]", "appint: argument 1 must be a list of integers");
@@ -263,7 +315,6 @@ private struct Builtin
         import exlang.symtab.symbol;
 
         import std.exception;
-        import std.stdio;
 
         enforce!EvalException(args.length == 2, "appstr: expects 2 arguments");
         enforce!EvalException(args[0].type.ident == "[Char]", "appstr: argument 1 must be a string");
@@ -292,6 +343,9 @@ private struct Builtin
         printchr = new Intrinsic("printchr", new Type("Void"), [new Type("Char")], toDelegate(&printchr_impl));
         printlst = new Intrinsic("printlst", new Type("Void"), [new ArrayType(new Type("Int"))], toDelegate(&printlst_impl));
         print = new Intrinsic("print", new Type("Void"), [new ArrayType(new Type("Char"))], toDelegate(&print_impl));
+
+        // IO functions
+        readln = new Intrinsic("readln", new ArrayType(new Type("Char")), [], toDelegate(&readln_impl));
 
         // List functions
         appint = new Intrinsic("appint", new ArrayType(new Type("Int")), [new ArrayType(new Type("Int")), new ArrayType(new Type("Int"))], toDelegate(&appint_impl));

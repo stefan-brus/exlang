@@ -301,44 +301,19 @@ class Parser
         {
             case Identifier: switch ( next.type )
                 {
-                    // Expression terminated
-                    case Comma:
-                    case RParen:
-                    case Semicolon:
-                        result = new IdentExpression(tok.str);
-                        break;
-
                     // Function call
                     case LParen:
                         result = this.parseCallExpression(tok.str);
                         break;
 
-                    // Binary expressions
-                    case Plus:
-                        result = this.parseExpression(new IdentExpression(tok.str));
-                        break;
-
                     default:
-                        throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", next.str, to!string(next.type)));
+                        result = new IdentExpression(tok.str);
+                        break;
                 }
                 break;
 
-            case IntLit: switch ( next.type )
-                {
-                    case Semicolon:
-                    case Comma:
-                    case RBracket:
-                        result = new IntExpression(to!ulong(tok.str));
-                        break;
-
-                    // Binary expressions
-                    case Plus:
-                        result = this.parseExpression(new IntExpression(to!ulong(tok.str)));
-                        break;
-
-                    default:
-                        throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", next.str, to!string(next.type)));
-                }
+            case IntLit:
+                result = new IntExpression(to!ulong(tok.str));
                 break;
 
             case SingleQuote:

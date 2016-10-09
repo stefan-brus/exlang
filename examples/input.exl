@@ -1,0 +1,5 @@
+// Example usage of the readln function
+def main() Void:
+  print("What is your name?");
+  let name = readln();
+  print("Hello, " ~ name ~ "!");

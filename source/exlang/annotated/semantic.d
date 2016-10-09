@@ -501,10 +501,10 @@ class Semantic
         import std.format;
 
         auto ann_left = this.analyzeExpression(exp.left, env);
-        enforce!SemanticException(cast(ArrayType)ann_left.type !is null, format("First argument of expression %s must be a list", exp.toString()));
+        enforce!SemanticException(cast(ArrayType)ann_left.type !is null, format("First argument of expression %s must be a list, not %s", exp.toString(), ann_left.type.ident));
 
         auto ann_right = this.analyzeExpression(exp.right, env);
-        enforce!SemanticException(cast(ArrayType)ann_right.type !is null, format("Second argument of expression %s must be a list", exp.toString()));
+        enforce!SemanticException(cast(ArrayType)ann_right.type !is null, format("Second argument of expression %s must be a list, not %s", exp.toString(), ann_right.type.ident));
 
         enforce!SemanticException(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
 
