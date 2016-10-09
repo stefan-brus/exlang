@@ -64,6 +64,12 @@ enum TokType
     WSRet,
 
     /**
+     * Other character
+     */
+
+    Other,
+
+    /**
      * End of input
      */
 

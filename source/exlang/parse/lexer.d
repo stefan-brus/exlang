@@ -174,6 +174,13 @@ class Lexer
                 return Token(TokType.IntLit, int_lit);
             }
 
+            auto other = this.findOther();
+            if ( other !is null )
+            {
+                this.pos += other.length;
+                return Token(TokType.Other, other);
+            }
+
             // No valid token found, throw error
             throw new LexerException("No valid token found");
         }
@@ -320,6 +327,23 @@ class Lexer
 
         assert(this.pos + lit_len <= this.str.length);
         return this.str[this.pos .. this.pos + lit_len];
+    }
+
+    /**
+     * Find an 'other' character
+     *
+     * Returns:
+     *      The string representation of the character
+     */
+
+    private string findOther ( )
+    in
+    {
+        assert(this.pos < this.str.length);
+    }
+    body
+    {
+        return this.str[this.pos .. this.pos + 1];
     }
 
     /**

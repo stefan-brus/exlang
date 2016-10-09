@@ -2,10 +2,18 @@
 
 Experimental programming language.
 
-## Example
+## Examples
+
+### Hello, World!
 
 ```
-// The very first, historical, exlang program, that interprets and runs
+def main() Void:
+  print("Hello, World!");
+```
+
+### The very first, historical, exlang program, that interprets and runs
+
+```
 def main() Void:
   let v = 3;
   let w = 4;

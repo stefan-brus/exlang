@@ -1,0 +1,3 @@
+// Hello world example
+def main() Void:
+  print("Hello, World!");
