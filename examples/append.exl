@@ -1,0 +1,10 @@
+// Example usage of the append functions and operator
+def main() Void:
+  let int_lst = appint([1], [2, 3]);
+  printlst(int_lst);
+  printlst([4, 5] ~ [6, 7, 8]);
+  let first_name = "Stefan";
+  let last_name = "Brus";
+  let name_str = appstr(first_name, " ") ~ last_name;
+  print(name_str);
+  print("Hello," ~ " " ~ "World!");

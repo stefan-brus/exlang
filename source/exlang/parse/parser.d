@@ -287,6 +287,8 @@ class Parser
 
     private Expression parseExpression ( Expression left = null )
     {
+        import exlang.parse.util;
+
         import std.conv;
         import std.exception;
         import std.format;
@@ -298,56 +300,80 @@ class Parser
         with ( TokType ) switch ( tok.type )
         {
             case Identifier: switch ( next.type )
-            {
-                // Expression terminated
-                case Comma:
-                case RParen:
-                case Semicolon:
-                    return new IdentExpression(tok.str);
+                {
+                    // Expression terminated
+                    case Comma:
+                    case RParen:
+                    case Semicolon:
+                        result = new IdentExpression(tok.str);
+                        break;
 
-                // Function call
-                case LParen:
-                    return this.parseCallExpression(tok.str);
+                    // Function call
+                    case LParen:
+                        result = this.parseCallExpression(tok.str);
+                        break;
 
-                // Binary expressions
-                case Plus:
-                    return this.parseExpression(new IdentExpression(tok.str));
+                    // Binary expressions
+                    case Plus:
+                        result = this.parseExpression(new IdentExpression(tok.str));
+                        break;
 
-                default:
-                    throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", next.str, to!string(next.type)));
-            }
+                    default:
+                        throw new ParseException(format("Invalid token following Identifier: '%s' of type %s", next.str, to!string(next.type)));
+                }
+                break;
 
             case IntLit: switch ( next.type )
-            {
-                case Semicolon:
-                case Comma:
-                case RBracket:
-                    return new IntExpression(to!ulong(tok.str));
+                {
+                    case Semicolon:
+                    case Comma:
+                    case RBracket:
+                        result = new IntExpression(to!ulong(tok.str));
+                        break;
 
-                // Binary expressions
-                case Plus:
-                    return this.parseExpression(new IntExpression(to!ulong(tok.str)));
+                    // Binary expressions
+                    case Plus:
+                        result = this.parseExpression(new IntExpression(to!ulong(tok.str)));
+                        break;
 
-                default:
-                    throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", next.str, to!string(next.type)));
-            }
+                    default:
+                        throw new ParseException(format("Invalid token following IntLit: '%s' of type %s", next.str, to!string(next.type)));
+                }
+                break;
 
             case SingleQuote:
-                return this.parseCharLitExpression();
+                result = this.parseCharLitExpression();
+                break;
 
             case Quote:
-                return this.parseStringLitExpression();
+                result = this.parseStringLitExpression();
+                break;
 
             case Plus:
                 enforce!ParseException(left !is null, "Invalid token: Plus");
-                return this.parseAddExpression(left);
+                result = this.parseAddExpression(left);
+                break;
+
+            case Tilde:
+                enforce!ParseException(left !is null, "Invalid token: Tilde");
+                result = this.parseAppendExpression(left);
+                break;
 
             case LBracket:
-                return this.parseListExpression();
+                result = this.parseListExpression();
+                break;
 
             default:
                 throw new ParseException(format("Invalid expression token '%s' of type %s", next.str, to!string(next.type)));
         }
+
+        // Continue parsing expression tree if the next token is a binary operator
+        if ( isBinOp(this.lexer.peekToken().type) )
+        {
+            result = this.parseExpression(result);
+        }
+
+        return result;
     }
 
     /**
@@ -402,6 +428,31 @@ class Parser
         auto right = this.parseExpression();
 
         return new AddExpression(left, right);
+    }
+
+    /**
+     * Parse an append expression
+     *
+     * Params:
+     *      left = The left expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private AppendExpression parseAppendExpression ( Expression left )
+    in
+    {
+        assert(left !is null);
+    }
+    body
+    {
+        auto right = this.parseExpression();
+
+        return new AppendExpression(left, right);
     }
 
     /**
@@ -532,9 +583,10 @@ class Parser
         import std.conv;
         import std.format;
 
-        if ( this.lexer.peekToken().type != Type )
+        auto next_type = this.lexer.peekToken().type;
+        if ( next_type != Type )
         {
-            throw new ParseException(format("Expected token of type: %s", to!string(Type)));
+            throw new ParseException(format("Expected token of type: %s, got: %s", to!string(Type), to!string(next_type)));
         }
 
         return this.lexer.popToken();

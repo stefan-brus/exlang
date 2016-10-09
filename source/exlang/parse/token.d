@@ -42,6 +42,7 @@ enum TokType
     Equals,
     Plus,
     Slash,
+    Tilde,
     SingleQuote,
     Quote,
     Backslash,
@@ -91,6 +92,7 @@ enum TokType[string] RES_OPS = [
     "=": TokType.Equals,
     "+": TokType.Plus,
     "/": TokType.Slash,
+    "~": TokType.Tilde,
     "'": TokType.SingleQuote,
     "\"": TokType.Quote,
     "\\": TokType.Backslash

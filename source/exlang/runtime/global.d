@@ -29,10 +29,16 @@ void setupGlobal ( Env env )
     env["String"] = new ArrayType(cast(Type)env["Char"]);
 
     // The intrinsic functions
+
+    // Print functions
     env["printnum"] = new IntrinsicFunction("printnum", Builtin.printnum);
     env["printchr"] = new IntrinsicFunction("printchr", Builtin.printchr);
     env["printlst"] = new IntrinsicFunction("printlst", Builtin.printlst);
     env["print"] = new IntrinsicFunction("print", Builtin.print);
+
+    // List functions
+    env["appint"] = new IntrinsicFunction("appint", Builtin.appint);
+    env["appstr"] = new IntrinsicFunction("appstr", Builtin.appstr);
 }
 
 /**
@@ -197,15 +203,98 @@ private struct Builtin
 
     static Intrinsic print;
 
+    /**
+     * appint
+     *
+     * Append two integer lists
+     *
+     * Params:
+     *      args = The arguments
+     *
+     * Returns:
+     *      The appended list
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    static Value appint_impl ( Value[] args )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.stdio;
+
+        enforce!EvalException(args.length == 2, "appint: expects 2 arguments");
+        enforce!EvalException(args[0].type.ident == "[Int]", "appint: argument 1 must be a list of integers");
+        enforce!EvalException(args[1].type.ident == "[Int]", "appint: argument 2 must be a list of integers");
+
+        auto result = new Value(args[0].type);
+
+        auto lst1 = args[0].get!(Value[]);
+        auto lst2 = args[1].get!(Value[]);
+
+        result.set(lst1 ~ lst2);
+
+        return result;
+    }
+
+    static Intrinsic appint;
+
+    /**
+     * appstr
+     *
+     * Append two strings
+     *
+     * Params:
+     *      args = The arguments
+     *
+     * Returns:
+     *      The appended string
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    static Value appstr_impl ( Value[] args )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.stdio;
+
+        enforce!EvalException(args.length == 2, "appstr: expects 2 arguments");
+        enforce!EvalException(args[0].type.ident == "[Char]", "appstr: argument 1 must be a string");
+        enforce!EvalException(args[1].type.ident == "[Char]", "appstr: argument 2 must be a string");
+
+        auto result = new Value(args[0].type);
+
+        auto lst1 = args[0].get!(Value[]);
+        auto lst2 = args[1].get!(Value[]);
+
+        result.set(lst1 ~ lst2);
+
+        return result;
+    }
+
+    static Intrinsic appstr;
+
     static this ( )
     {
         import exlang.symtab.symbol;
 
         import std.functional;
 
+        // Print functions
         printnum = new Intrinsic("printnum", new Type("Void"), [new Type("Int")], toDelegate(&printnum_impl));
         printchr = new Intrinsic("printchr", new Type("Void"), [new Type("Char")], toDelegate(&printchr_impl));
         printlst = new Intrinsic("printlst", new Type("Void"), [new ArrayType(new Type("Int"))], toDelegate(&printlst_impl));
         print = new Intrinsic("print", new Type("Void"), [new ArrayType(new Type("Char"))], toDelegate(&print_impl));
+
+        // List functions
+        appint = new Intrinsic("appint", new ArrayType(new Type("Int")), [new ArrayType(new Type("Int")), new ArrayType(new Type("Int"))], toDelegate(&appint_impl));
+        appstr = new Intrinsic("appstr", new ArrayType(new Type("Char")), [new ArrayType(new Type("Char")), new ArrayType(new Type("Char"))], toDelegate(&appstr_impl));
     }
 }

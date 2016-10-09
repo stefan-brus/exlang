@@ -330,6 +330,10 @@ class Semantic
         {
             return this.analyzeAddExp(add_exp, env);
         }
+        else if ( auto append_exp = cast(AppendExpression)exp )
+        {
+            return this.analyzeAppendExp(append_exp, env);
+        }
         else if ( auto int_exp = cast(IntExpression)exp )
         {
             return this.analyzeIntExp(int_exp, env);
@@ -468,9 +472,53 @@ class Semantic
         auto ann_right = this.analyzeExpression(exp.right, env);
         enforce!SemanticException(ann_right.type.ident == "Int", format("Second argument of expression %s must be of type Int", exp.toString()));
 
-        enforce(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
+        enforce!SemanticException(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
 
         return new AnnAddExpression(ann_left.type, ann_left, ann_right);
+    }
+
+    /**
+     * Analyze an append expression
+     *
+     * Lowers it to a call to an append function
+     *
+     * Params:
+     *      exp = The append expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The lowered expression
+     *
+     * Throws:
+     *      SemanticException on semantic error
+     */
+
+    private AnnCallExpression analyzeAppendExp ( AppendExpression exp, Env env )
+    {
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.format;
+
+        auto ann_left = this.analyzeExpression(exp.left, env);
+        enforce!SemanticException(cast(ArrayType)ann_left.type !is null, format("First argument of expression %s must be a list", exp.toString()));
+
+        auto ann_right = this.analyzeExpression(exp.right, env);
+        enforce!SemanticException(cast(ArrayType)ann_right.type !is null, format("Second argument of expression %s must be a list", exp.toString()));
+
+        enforce!SemanticException(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
+
+        switch ( ann_left.type.ident )
+        {
+            case "[Int]":
+                return new AnnCallExpression(ann_left.type, "appint", [ann_left, ann_right]);
+
+            case "[Char]":
+                return new AnnCallExpression(ann_left.type, "appstr", [ann_left, ann_right]);
+
+            default:
+                throw new SemanticException(format("Invalid type in expression %s", exp.toString()));
+        }
     }
 
     /**
