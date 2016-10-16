@@ -208,8 +208,13 @@ class Parser
                 result = this.parseRetStatement();
                 break;
 
+            case TokType.If:
+                result = this.parseIfStatement();
+                break;
+
             default:
                 result = this.parseExpStatement();
+                break;
         }
 
         this.expect!(TokType.Semicolon)();
@@ -253,6 +258,68 @@ class Parser
         auto exp = this.parseExpression();
 
         return new RetStatement(exp);
+    }
+
+    /**
+     * Parse an if statement
+     *
+     * Returns:
+     *      The parsed statement
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private IfStatement parseIfStatement ( )
+    {
+        this.expect!(TokType.If)();
+        auto cond = this.parseExpression();
+        this.expect!(TokType.Colon)();
+
+        Statement[] stmts;
+        auto next_type = this.lexer.peekToken().type;
+        while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.Endif )
+        {
+            stmts ~= parseStatement();
+            next_type = this.lexer.peekToken().type;
+        }
+
+        IfStatement.ElifClause[] elifs;
+        while ( next_type == TokType.Elif )
+        {
+            this.expect!(TokType.Elif)();
+            auto elif_cond = this.parseExpression();
+            this.expect!(TokType.Colon)();
+
+            Statement[] elif_stmts;
+            next_type = this.lexer.peekToken().type;
+            while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.Endif )
+            {
+                elif_stmts ~= this.parseStatement();
+                next_type = this.lexer.peekToken().type;
+            }
+
+            elifs ~= IfStatement.ElifClause(elif_cond, elif_stmts);
+            next_type = this.lexer.peekToken().type;
+        }
+
+        Statement[] else_stmts;
+        if ( next_type == TokType.Else )
+        {
+            this.expect!(TokType.Else)();
+            this.expect!(TokType.Colon)();
+
+            next_type = this.lexer.peekToken().type;
+            while ( next_type != TokType.Endif )
+            {
+                else_stmts ~= this.parseStatement();
+                next_type = this.lexer.peekToken().type;
+            }
+        }
+
+        this.expect!(TokType.Endif);
+
+        return new IfStatement(cond, stmts, elifs, else_stmts);
     }
 
     /**
@@ -324,6 +391,11 @@ class Parser
                 result = this.parseStringLitExpression();
                 break;
 
+            case Equals:
+                enforce!ParseException(left !is null, "Invalid token: Equals");
+                result = this.parseEqualsExpression(left);
+                break;
+
             case Plus:
                 enforce!ParseException(left !is null, "Invalid token: Plus");
                 result = this.parseAddExpression(left);
@@ -378,6 +450,28 @@ class Parser
         this.expect!(TokType.RParen)();
 
         return new CallExpression(ident, arg_exps);
+    }
+
+    /**
+     * Parse an equals expression
+     *
+     * Params:
+     *      left = The left expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private EqualsExpression parseEqualsExpression ( Expression left )
+    {
+        this.expect!(TokType.Equals)();
+
+        auto right = this.parseExpression();
+
+        return new EqualsExpression(left, right);
     }
 
     /**

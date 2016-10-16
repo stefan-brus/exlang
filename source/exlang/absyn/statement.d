@@ -66,7 +66,7 @@ class LetStatement : Statement
  * Return statement
  */
 
-class RetStatement: Statement
+class RetStatement : Statement
 {
     import exlang.absyn.expression;
 
@@ -100,6 +100,117 @@ class RetStatement: Statement
         import std.format;
 
         return format("ret %s;", this.exp.toString());
+    }
+}
+
+/**
+ * If statement
+ */
+
+class IfStatement : Statement
+{
+    import exlang.absyn.expression;
+
+    /**
+     * The condition
+     */
+
+    Expression cond;
+
+    /**
+     * The statement list
+     */
+
+    Statement[] stmts;
+
+    /**
+     * Optional elif clauses
+     */
+
+    struct ElifClause
+    {
+        /**
+         * The condition
+         */
+
+        Expression cond;
+
+        /**
+         * The statement list
+         */
+
+        Statement[] stmts;
+    }
+    ///ditto
+    ElifClause[] elifs;
+
+    /**
+     * Optional else clause
+     */
+
+    Statement[] else_stmts;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      cond = The condition
+     *      stmts = The statements
+     *      elifs = The else if clauses
+     *      else_stmts = The optional else clause
+     */
+
+    this ( Expression cond, Statement[] stmts, ElifClause[] elifs, Statement[] else_stmts )
+    {
+        this.cond = cond;
+        this.stmts = stmts;
+        this.elifs = elifs;
+        this.else_stmts = else_stmts;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this statement
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        string result;
+
+        result ~= format("if %s:\n", this.cond);
+
+        foreach ( stmt; this.stmts )
+        {
+            result ~= format("%s\n", stmt);
+        }
+
+        foreach ( elif; this.elifs )
+        {
+            result ~= format("elif %s:\n", elif.cond);
+
+            foreach ( stmt; elif.stmts )
+            {
+                result ~= format("%s\n", stmt);
+            }
+        }
+
+        if ( this.else_stmts.length > 0 )
+        {
+            result ~= format("else:\n");
+
+            foreach ( stmt; this.else_stmts )
+            {
+                result ~= format("%s\n", stmt);
+            }
+        }
+
+        result ~= format("endif;");
+
+        return result;
     }
 }
 

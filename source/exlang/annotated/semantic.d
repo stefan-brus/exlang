@@ -235,6 +235,10 @@ class Semantic
         {
             return this.analyzeExpStmt(exp_stmt, env);
         }
+        else if ( auto if_stmt = cast(IfStatement)stmt )
+        {
+            return this.analyzeIfStmt(if_stmt, env);
+        }
         else
         {
             throw new SemanticException(format("Unexpected statement: %s", stmt.toString()));
@@ -283,6 +287,55 @@ class Semantic
     }
 
     /**
+     * Analyze an if statement
+     *
+     * Params:
+     *      if_stmt = The absyn statement
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated statement
+     */
+
+    private AnnIfStatement analyzeIfStmt ( IfStatement if_stmt, Env env )
+    {
+        import std.exception;
+        import std.format;
+
+        auto ann_cond = this.analyzeExpression(if_stmt.cond, env);
+        enforce!SemanticException(ann_cond.type.ident == "Bool", format("Condition must be boolean, not %s", if_stmt.cond));
+
+        AnnStatement[] ann_stmts;
+        foreach ( stmt; if_stmt.stmts )
+        {
+            ann_stmts ~= this.analyzeStatement(stmt, env);
+        }
+
+        AnnIfStatement.AnnElifClause[] ann_elifs;
+        foreach ( elif; if_stmt.elifs )
+        {
+            auto ann_elif_cond = this.analyzeExpression(elif.cond, env);
+            enforce!SemanticException(ann_elif_cond.type.ident == "Bool", format("Condition must be boolean, not %s", elif.cond));
+
+            AnnStatement[] ann_elif_stmts;
+            foreach ( stmt; elif.stmts )
+            {
+                ann_elif_stmts ~= this.analyzeStatement(stmt, env);
+            }
+
+            ann_elifs ~= AnnIfStatement.AnnElifClause(ann_elif_cond, ann_elif_stmts);
+        }
+
+        AnnStatement[] ann_else_stmts;
+        foreach ( stmt; if_stmt.else_stmts )
+        {
+            ann_else_stmts ~= this.analyzeStatement(stmt, env);
+        }
+
+        return new AnnIfStatement(ann_cond, ann_stmts, ann_elifs, ann_else_stmts);
+    }
+
+    /**
      * Analyze an expression statement
      *
      * Params:
@@ -325,6 +378,10 @@ class Semantic
         else if ( auto call_exp = cast(CallExpression)exp )
         {
             return this.analyzeCallExp(call_exp, env);
+        }
+        else if ( auto equals_exp = cast(EqualsExpression)exp )
+        {
+            return this.analyzeEqualsExp(equals_exp, env);
         }
         else if ( auto add_exp = cast(AddExpression)exp )
         {
@@ -445,6 +502,32 @@ class Semantic
         {
             throw new SemanticException(format("Symbol %s must be a function", exp.ident));
         }
+    }
+
+    /**
+     * Analyze an equals expression
+     *
+     * Params:
+     *      exp = The absyn expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated expression
+     *
+     * Throws:
+     *      SemanticException on semantic error
+     */
+
+    private AnnEqualsExpression analyzeEqualsExp ( EqualsExpression exp, Env env )
+    {
+        import std.exception;
+        import std.format;
+
+        auto ann_left = this.analyzeExpression(exp.left, env);
+        auto ann_right = this.analyzeExpression(exp.right, env);
+        enforce!SemanticException(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
+
+        return new AnnEqualsExpression(ann_left, ann_right);
     }
 
     /**

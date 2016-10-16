@@ -76,6 +76,72 @@ class AnnRetStatement : AnnStatement
 }
 
 /**
+ * Annotated if statement
+ */
+
+class AnnIfStatement : AnnStatement
+{
+    import exlang.annotated.expression;
+
+    /**
+     * The condition
+     */
+
+    AnnExpression cond;
+
+    /**
+     * The statement list
+     */
+
+    AnnStatement[] stmts;
+
+    /**
+     * Optional elif clauses
+     */
+
+    struct AnnElifClause
+    {
+        /**
+         * The condition
+         */
+
+        AnnExpression cond;
+
+        /**
+         * The statement list
+         */
+
+        AnnStatement[] stmts;
+    }
+    ///ditto
+    AnnElifClause[] elifs;
+
+    /**
+     * Optional else clause
+     */
+
+    AnnStatement[] else_stmts;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      cond = The condition
+     *      stmts = The statements
+     *      elifs = The else if clauses
+     *      else_stmts = The optional else clause
+     */
+
+    this ( AnnExpression cond, AnnStatement[] stmts, AnnElifClause[] elifs, AnnStatement[] else_stmts )
+    {
+        this.cond = cond;
+        this.stmts = stmts;
+        this.elifs = elifs;
+        this.else_stmts = else_stmts;
+    }
+}
+
+/**
  * Annotated expression statement
  */
 

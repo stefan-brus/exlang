@@ -20,6 +20,7 @@ bool isBinOp ( TokType type )
 {
     with ( TokType ) switch ( type )
     {
+        case Equals:
         case Plus:
         case Slash:
         case Tilde:

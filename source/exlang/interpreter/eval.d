@@ -145,6 +145,7 @@ class Evaluator
     private Value evalStatement ( AnnStatement stmt, Env env )
     {
         import exlang.interpreter.exception;
+
         if ( auto let_stmt = cast(AnnLetStatement)stmt )
         {
             return this.evalLetStatement(let_stmt, env);
@@ -152,6 +153,10 @@ class Evaluator
         else if ( auto ret_stmt = cast(AnnRetStatement)stmt )
         {
             return this.evalRetStatement(ret_stmt, env);
+        }
+        else if ( auto if_stmt = cast(AnnIfStatement)stmt )
+        {
+            return this.evalIfStatement(if_stmt, env);
         }
         else if ( auto exp_stmt = cast(AnnExpStatement)stmt )
         {
@@ -178,7 +183,8 @@ class Evaluator
     {
         import exlang.symtab.symbol;
 
-        env[stmt.ident] = new Variable(stmt.ident, stmt.exp.type, stmt.exp);
+        auto val = this.evalExpression(stmt.exp, env);
+        env[stmt.ident] = new ValueVar(stmt.ident, val);
 
         return cast(Value)Value.VOID;
     }
@@ -200,6 +206,85 @@ class Evaluator
     private Value evalRetStatement ( AnnRetStatement stmt, Env env )
     {
         return this.evalExpression(stmt.exp, env);
+    }
+
+    /**
+     * Evaluate an if statement
+     *
+     * Params:
+     *      stmt = The statement
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The statement value
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    private Value evalIfStatement ( AnnIfStatement stmt, Env env )
+    {
+        import exlang.interpreter.exception;
+
+        import std.exception;
+        import std.format;
+
+        AnnStatement[] eval_stmts;
+
+        /**
+         * Helper function to evaluate a condition and set the statements
+         * to be evaluated, if it was true
+         *
+         * Params:
+         *      cond = The condition
+         *      stmts = The statements
+         *
+         * Returns:
+         *      The value of cond
+         *
+         * Throws:
+         *      EvalException on error
+         */
+
+        bool checkAndSet ( AnnExpression cond, AnnStatement[] stmts )
+        {
+            enforce!EvalException(stmt.cond.type == env["Bool"], format("If statement conditions must be of type Bool, got %s", stmt.cond.type.ident));
+
+            if ( this.evalExpression(cond, env).get!bool )
+            {
+                eval_stmts = stmts;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        if ( !checkAndSet(stmt.cond, stmt.stmts) )
+        {
+            bool elif_found;
+            foreach ( elif; stmt.elifs )
+            {
+                if ( checkAndSet(elif.cond, elif.stmts) )
+                {
+                    elif_found = true;
+                    break;
+                }
+            }
+
+            if ( !elif_found )
+            {
+                eval_stmts = stmt.else_stmts;
+            }
+        }
+
+        foreach ( eval_stmt; eval_stmts )
+        {
+            this.evalStatement(eval_stmt, env);
+        }
+
+        return cast(Value)Value.VOID;
     }
 
     /**
@@ -246,6 +331,10 @@ class Evaluator
         else if ( auto call_exp = cast(AnnCallExpression)exp )
         {
             return this.evalCallExpression(call_exp, env);
+        }
+        else if ( auto equals_exp = cast(AnnEqualsExpression)exp )
+        {
+            return this.evalEqualsExpression(equals_exp, env);
         }
         else if ( auto add_exp = cast(AnnAddExpression)exp )
         {
@@ -341,6 +430,33 @@ class Evaluator
         {
             throw new EvalException(format("%s expected to be a function", exp.ident));
         }
+    }
+
+    /**
+     * Evaluate an equals expression
+     *
+     * Params:
+     *      exp = The expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The expression value
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    private Value evalEqualsExpression ( AnnEqualsExpression exp, Env env )
+    {
+        import exlang.symtab.symbol;
+
+        auto val_left = this.evalExpression(exp.left, env);
+        auto val_right = this.evalExpression(exp.right, env);
+
+        auto result = new Value(cast(Type)env["Bool"]);
+        result.set(Value.compare(val_left, val_right) == 0);
+
+        return result;
     }
 
     /**

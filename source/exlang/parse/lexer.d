@@ -249,12 +249,25 @@ class Lexer
     }
     body
     {
-        if ( this.pos + 3 > this.str.length ) return null;
+        import util.array;
 
-        auto word_str = this.str[this.pos .. this.pos + 3];
-        if ( word_str in RES_WORDS )
+        enum MAX_LEN = RES_WORDS.keys.longestLength();
+        enum MIN_LEN = 2;
+
+        size_t search_len = MAX_LEN;
+
+        while ( search_len >= MIN_LEN )
         {
-            return word_str;
+            if ( this.pos + search_len <= this.str.length )
+            {
+                auto word_str = this.str[this.pos .. this.pos + search_len];
+                if ( word_str in RES_WORDS )
+                {
+                    return word_str;
+                }
+            }
+
+            search_len--;
         }
 
         return null;

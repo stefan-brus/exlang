@@ -26,6 +26,7 @@ void setupGlobal ( Env env )
     env["Void"] = new Type("Void");
     env["Int"] = new Type("Int");
     env["Char"] = new Type("Char");
+    env["Bool"] = new Type("Bool");
     env["String"] = new ArrayType(cast(Type)env["Char"]);
 
     // The intrinsic functions

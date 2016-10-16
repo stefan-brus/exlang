@@ -37,8 +37,6 @@ abstract class AnnExpression
 
 class AnnIdentExpression : AnnExpression
 {
-    import exlang.symtab.symbol;
-
     /**
      * The identifier
      */
@@ -67,8 +65,6 @@ class AnnIdentExpression : AnnExpression
 
 class AnnCallExpression : AnnExpression
 {
-    import exlang.symtab.symbol;
-
     /**
      * The identifier
      */
@@ -100,13 +96,48 @@ class AnnCallExpression : AnnExpression
 }
 
 /**
+ * Annotated equals expression
+ */
+
+class AnnEqualsExpression : AnnExpression
+{
+    /**
+     * The left expression
+     */
+
+    AnnExpression left;
+
+    /**
+     * The right expression
+     */
+
+    AnnExpression right;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      left = The left expression
+     *      right = The right expression
+     */
+
+    this ( AnnExpression left, AnnExpression right )
+    {
+        import exlang.symtab.env;
+
+        super(cast(Type)Env.global["Bool"]);
+
+        this.left = left;
+        this.right = right;
+    }
+}
+
+/**
  * Annotated addition expression
  */
 
 class AnnAddExpression : AnnExpression
 {
-    import exlang.symtab.symbol;
-
     /**
      * The left expression
      */

@@ -2,6 +2,8 @@
  * Test that the examples compile and run without errors
  */
 
+module test.examples;
+
 /**
  * Main
  */

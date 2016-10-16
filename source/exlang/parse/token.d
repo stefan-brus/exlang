@@ -54,6 +54,10 @@ enum TokType
     Let,
     Def,
     Ret,
+    If,
+    Elif,
+    Else,
+    Endif,
 
     /**
      * Whitespace
@@ -105,7 +109,11 @@ enum TokType[string] RES_OPS = [
 enum TokType[string] RES_WORDS = [
     "let": TokType.Let,
     "def": TokType.Def,
-    "ret": TokType.Ret
+    "ret": TokType.Ret,
+    "if": TokType.If,
+    "elif": TokType.Elif,
+    "else": TokType.Else,
+    "endif": TokType.Endif
 ];
 
 /**
