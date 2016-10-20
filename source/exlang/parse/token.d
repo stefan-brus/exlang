@@ -57,7 +57,7 @@ enum TokType
     If,
     Elif,
     Else,
-    Endif,
+    End,
 
     /**
      * Whitespace
@@ -113,7 +113,7 @@ enum TokType[string] RES_WORDS = [
     "if": TokType.If,
     "elif": TokType.Elif,
     "else": TokType.Else,
-    "endif": TokType.Endif
+    "end": TokType.End
 ];
 
 /**

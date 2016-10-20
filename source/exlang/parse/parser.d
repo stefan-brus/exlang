@@ -278,7 +278,7 @@ class Parser
 
         Statement[] stmts;
         auto next_type = this.lexer.peekToken().type;
-        while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.Endif )
+        while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.End )
         {
             stmts ~= parseStatement();
             next_type = this.lexer.peekToken().type;
@@ -293,7 +293,7 @@ class Parser
 
             Statement[] elif_stmts;
             next_type = this.lexer.peekToken().type;
-            while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.Endif )
+            while ( next_type != TokType.Elif && next_type != TokType.Else && next_type != TokType.End )
             {
                 elif_stmts ~= this.parseStatement();
                 next_type = this.lexer.peekToken().type;
@@ -310,14 +310,14 @@ class Parser
             this.expect!(TokType.Colon)();
 
             next_type = this.lexer.peekToken().type;
-            while ( next_type != TokType.Endif )
+            while ( next_type != TokType.End )
             {
                 else_stmts ~= this.parseStatement();
                 next_type = this.lexer.peekToken().type;
             }
         }
 
-        this.expect!(TokType.Endif);
+        this.expect!(TokType.End);
 
         return new IfStatement(cond, stmts, elifs, else_stmts);
     }

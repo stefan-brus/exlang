@@ -208,7 +208,7 @@ class IfStatement : Statement
             }
         }
 
-        result ~= format("endif;");
+        result ~= format("end;");
 
         return result;
     }
