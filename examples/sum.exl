@@ -1,0 +1,4 @@
+// Prompt the user for a number, print the sum of 1 to that number
+def main() Void:
+  print("Input a number");
+  auto input = readln();

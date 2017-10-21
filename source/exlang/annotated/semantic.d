@@ -239,6 +239,10 @@ class Semantic
         {
             return this.analyzeIfStmt(if_stmt, env);
         }
+        else if ( auto for_stmt = cast(ForStatement)stmt )
+        {
+            return this.analyzeForStmt(for_stmt, env);
+        }
         else
         {
             throw new SemanticException(format("Unexpected statement: %s", stmt.toString()));
@@ -256,6 +260,9 @@ class Semantic
      *
      * Returns:
      *      The annotated statement
+     *
+     * Throws:
+     *      SemanticException on semantic error
      */
 
     private AnnLetStatement analyzeLetStmt ( LetStatement stmt, Env env )
@@ -277,6 +284,9 @@ class Semantic
      *
      * Returns:
      *      The annotated statement
+     *
+     * Throws:
+     *      SemanticException on semantic error
      */
 
     private AnnRetStatement analyzeRetStmt ( RetStatement stmt, Env env )
@@ -295,6 +305,9 @@ class Semantic
      *
      * Returns:
      *      The annotated statement
+     *
+     * Throws:
+     *      SemanticException on semantic error
      */
 
     private AnnIfStatement analyzeIfStmt ( IfStatement if_stmt, Env env )
@@ -336,6 +349,44 @@ class Semantic
     }
 
     /**
+     * Analyze a for statement
+     *
+     * Params:
+     *      stmt = The absyn statement
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated statement
+     *
+     * Throws:
+     *      SemanticException on semantic error
+     */
+
+    private AnnForStatement analyzeForStmt ( ForStatement for_stmt, Env env )
+    {
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.format;
+
+        auto ann_iter_exp = this.analyzeExpression(for_stmt.iter_exp, env);
+        enforce!SemanticException(cast(ArrayType)ann_iter_exp.type !is null,
+            format("For statement iteration expression must be a list, not %s", ann_iter_exp.type.ident));
+
+        env[for_stmt.iter_ident.ident] = new Variable(for_stmt.iter_ident.ident, (cast(ArrayType)ann_iter_exp.type).internal, null);
+        auto ann_iter_ident = this.analyzeIdentExp(for_stmt.iter_ident, env);
+
+        AnnStatement[] ann_stmts;
+
+        foreach ( stmt; for_stmt.stmts )
+        {
+            ann_stmts ~= this.analyzeStatement(stmt, env);
+        }
+
+        return new AnnForStatement(ann_iter_ident, ann_iter_exp, ann_stmts);
+    }
+
+    /**
      * Analyze an expression statement
      *
      * Params:
@@ -344,6 +395,9 @@ class Semantic
      *
      * Returns:
      *      The annotated statement
+     *
+     * Throws:
+     *      SemanticException on semantic error
      */
 
     private AnnExpStatement analyzeExpStmt ( ExpStatement stmt, Env env )

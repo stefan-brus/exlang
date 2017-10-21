@@ -155,6 +155,16 @@ class Lexer
             {
                 assert(res_word in RES_WORDS);
                 this.pos += res_word.length;
+
+                // Workaround for the case where an identifier starts with a reserved word
+                // Example: a list of Int called 'int_list' starts with the 'In' token
+                auto ident = this.findIdent();
+                if ( ident !is null )
+                {
+                    this.pos += ident.length;
+                    return Token(TokType.Identifier, res_word ~ ident);
+                }
+
                 return Token(RES_WORDS[res_word], res_word);
             }
 

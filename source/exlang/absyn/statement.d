@@ -215,6 +215,74 @@ class IfStatement : Statement
 }
 
 /**
+ * For statement
+ */
+
+class ForStatement : Statement
+{
+    import exlang.absyn.expression;
+
+    /**
+     * The iterator identifier
+     */
+
+    IdentExpression iter_ident;
+
+    /**
+     * The expression to iterate
+     */
+
+    Expression iter_exp;
+
+    /**
+     * The statements
+     */
+
+    Statement[] stmts;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      iter_ident = The iterator identifier
+     *      iter_exp = The expression to iterate
+     *      stmts = The statements
+     */
+
+    this ( IdentExpression iter_ident, Expression iter_exp, Statement[] stmts )
+    {
+        this.iter_ident = iter_ident;
+        this.iter_exp = iter_exp;
+        this.stmts = stmts;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this statement
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        string result;
+
+        result ~= format("for %s in %s:\n", this.iter_ident, this.iter_exp);
+
+        foreach ( stmt; this.stmts )
+        {
+            result ~= format("%s\n", stmt);
+        }
+
+        result ~= "end;\n";
+
+        return result;
+    }
+}
+
+/**
  * Expression statement
  */
 

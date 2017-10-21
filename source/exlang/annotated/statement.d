@@ -142,6 +142,49 @@ class AnnIfStatement : AnnStatement
 }
 
 /**
+ * Annotated for statement
+ */
+
+class AnnForStatement : AnnStatement
+{
+    import exlang.annotated.expression;
+
+    /**
+     * The iterator identifier
+     */
+
+    AnnIdentExpression iter_ident;
+
+    /**
+     * The expression to iterate
+     */
+
+    AnnExpression iter_exp;
+
+    /**
+     * The statements
+     */
+
+    AnnStatement[] stmts;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      iter_ident = The iterator identifier
+     *      iter_exp = The expression to iterate
+     *      stmts = The statements
+     */
+
+    this ( AnnIdentExpression iter_ident, AnnExpression iter_exp, AnnStatement[] stmts )
+    {
+        this.iter_ident = iter_ident;
+        this.iter_exp = iter_exp;
+        this.stmts = stmts;
+    }
+}
+
+/**
  * Annotated expression statement
  */
 

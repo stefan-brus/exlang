@@ -1,0 +1,26 @@
+// Example of for .. in statements
+def main() Void:
+  for c in "hello":
+    printchr(c);
+  end;
+  for i in [1, 2, 3]:
+    printnum(i);
+  end;
+  for i in getIntList():
+    printnum(i);
+  end;
+  for c in getString():
+    printchr(c);
+  end;
+  print("Write something:");
+  let input = readln();
+  print("Here it is, one character per line:");
+  for c in input:
+    printchr(c);
+  end;
+
+def getIntList() [Int]:
+  ret [1, 2, 3];
+
+def getString() String:
+  ret "String from a function";

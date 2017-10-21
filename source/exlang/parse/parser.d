@@ -212,6 +212,10 @@ class Parser
                 result = this.parseIfStatement();
                 break;
 
+            case TokType.For:
+                result = this.parseForStatement();
+                break;
+
             default:
                 result = this.parseExpStatement();
                 break;
@@ -317,9 +321,39 @@ class Parser
             }
         }
 
-        this.expect!(TokType.End);
+        this.expect!(TokType.End)();
 
         return new IfStatement(cond, stmts, elifs, else_stmts);
+    }
+
+    /**
+     * Parse a for statement
+     *
+     * Returns:
+     *      The parsed statement
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private ForStatement parseForStatement ( )
+    {
+        this.expect!(TokType.For)();
+        auto iter_ident = this.expect!(TokType.Identifier)().str;
+        this.expect!(TokType.In)();
+        auto iter_exp = this.parseExpression();
+        this.expect!(TokType.Colon)();
+
+        Statement[] stmts;
+
+        while ( this.lexer.peekToken().type != TokType.End )
+        {
+            stmts ~= this.parseStatement();
+        }
+
+        this.expect!(TokType.End)();
+
+        return new ForStatement(new IdentExpression(iter_ident), iter_exp, stmts);
     }
 
     /**
@@ -401,6 +435,10 @@ class Parser
                 result = this.parseAddExpression(left);
                 break;
 
+            case Exclamation:
+                result = this.parseNotExpression(left);
+                break;
+
             case Tilde:
                 enforce!ParseException(left !is null, "Invalid token: Tilde");
                 result = this.parseAppendExpression(left);
@@ -411,7 +449,7 @@ class Parser
                 break;
 
             default:
-                throw new ParseException(format("Invalid expression token '%s' of type %s", next.str, to!string(next.type)));
+                throw new ParseException(format("Invalid expression token '%s' of type %s", tok.str, to!string(tok.type)));
         }
 
         // Continue parsing expression tree if the next token is a binary operator
@@ -497,6 +535,26 @@ class Parser
         auto right = this.parseExpression();
 
         return new AddExpression(left, right);
+    }
+
+    /**
+     * Parse a not expression
+     *
+     * Params:
+     *      left = The left expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private NotExpression parseNotExpression ( Expression left )
+    {
+        auto exp = this.parseExpression();
+
+        return new NotExpression(exp);
     }
 
     /**

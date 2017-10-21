@@ -42,6 +42,7 @@ enum TokType
     Equals,
     Plus,
     Slash,
+    Exclamation,
     Tilde,
     SingleQuote,
     Quote,
@@ -58,6 +59,8 @@ enum TokType
     Elif,
     Else,
     End,
+    For,
+    In,
 
     /**
      * Whitespace
@@ -96,6 +99,7 @@ enum TokType[string] RES_OPS = [
     "=": TokType.Equals,
     "+": TokType.Plus,
     "/": TokType.Slash,
+    "!": TokType.Exclamation,
     "~": TokType.Tilde,
     "'": TokType.SingleQuote,
     "\"": TokType.Quote,
@@ -113,7 +117,9 @@ enum TokType[string] RES_WORDS = [
     "if": TokType.If,
     "elif": TokType.Elif,
     "else": TokType.Else,
-    "end": TokType.End
+    "end": TokType.End,
+    "for": TokType.For,
+    "in": TokType.In
 ];
 
 /**

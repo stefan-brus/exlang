@@ -162,6 +162,10 @@ class Evaluator
         {
             return this.evalExpStatement(exp_stmt, env);
         }
+        else if ( auto for_stmt = cast(AnnForStatement)stmt )
+        {
+            return this.evalForStatement(for_stmt, env);
+        }
         else
         {
             throw new EvalException("Unknown statement type");
@@ -282,6 +286,45 @@ class Evaluator
         foreach ( eval_stmt; eval_stmts )
         {
             this.evalStatement(eval_stmt, env);
+        }
+
+        return cast(Value)Value.VOID;
+    }
+
+    /**
+     * Evaluate a for statement
+     *
+     * Params:
+     *      stmt = The statement
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The statement value
+     *
+     * Throws:
+     *      EvalException on error
+     */
+
+    private Value evalForStatement ( AnnForStatement stmt, Env env )
+    {
+        import exlang.interpreter.exception;
+        import exlang.symtab.symbol;
+
+        import std.exception;
+        import std.format;
+
+        auto iter_val = this.evalExpression(stmt.iter_exp, env);
+        enforce!EvalException(cast(ArrayType)iter_val.type !is null,
+            format("For statement iteration expressions must be lists, got %s", iter_val.type.ident));
+
+        foreach ( val; iter_val.get!(Value[]) )
+        {
+            env[stmt.iter_ident.ident] = new ValueVar(stmt.iter_ident.ident, val);
+
+            foreach ( body_stmt; stmt.stmts )
+            {
+                this.evalStatement(body_stmt, env);
+            }
         }
 
         return cast(Value)Value.VOID;

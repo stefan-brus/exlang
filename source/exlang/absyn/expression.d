@@ -203,6 +203,45 @@ class AddExpression : Expression
 }
 
 /**
+ * Not expression
+ */
+
+class NotExpression : Expression
+{
+    /**
+     * The expression to negate
+     */
+
+    Expression exp;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      exp = The expression to negate
+     */
+
+    this ( Expression exp )
+    {
+        this.exp = exp;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        return format("!%s", this.exp);
+    }
+}
+
+/**
  * Append expression
  */
 
