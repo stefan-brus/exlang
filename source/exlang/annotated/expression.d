@@ -169,6 +169,34 @@ class AnnAddExpression : AnnExpression
 }
 
 /**
+ * Annotated not expression
+ */
+
+class AnnNotExpression : AnnExpression
+{
+    /**
+     * The expression
+     */
+
+    AnnExpression exp;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      type = The expression type
+     *      exp = The expression
+     */
+
+    this ( Type type, AnnExpression exp )
+    {
+        super(type);
+
+        this.exp = exp;
+    }
+}
+
+/**
  * Annotated integer expression
  */
 

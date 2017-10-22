@@ -22,6 +22,8 @@ bool isBinOp ( TokType type )
     {
         case Equals:
         case Plus:
+        case Dash:
+        case Star:
         case Slash:
         case Tilde:
             return true;

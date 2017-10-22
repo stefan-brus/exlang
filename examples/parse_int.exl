@@ -17,11 +17,22 @@ def isNumStr(str : String) Bool:
   end;
   ret True;
 
+def isNum(c : Char) Bool:
+  let result = False;
+  if c < '0':
+    result = False;
+  elif c > '9':
+    result = False;
+  else
+    result = True;
+  end;
+  ret result;
+
 // This function does not care if the string actually represents an integer
 def parseInt(str : String) Int:
   let result = 0;
   for c in str:
     result = result * 10;
-    result = result + (c - '0');
+    result = result + c - '0';
   end;
   ret result;

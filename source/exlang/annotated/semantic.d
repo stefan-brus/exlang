@@ -441,6 +441,10 @@ class Semantic
         {
             return this.analyzeAddExp(add_exp, env);
         }
+        else if ( auto not_exp = cast(NotExpression)exp )
+        {
+            return this.analyzeNotExp(not_exp, env);
+        }
         else if ( auto append_exp = cast(AppendExpression)exp )
         {
             return this.analyzeAppendExp(append_exp, env);
@@ -612,6 +616,31 @@ class Semantic
         enforce!SemanticException(ann_left.type.ident == ann_right.type.ident, format("Arguments of expression %s must be of the same type", exp.toString()));
 
         return new AnnAddExpression(ann_left.type, ann_left, ann_right);
+    }
+
+    /**
+     * Analyize a not expression
+     *
+     * Params:
+     *      exp = The absyn expression
+     *      env = The environment frame
+     *
+     * Returns:
+     *      The annotated expression
+     *
+     * Throws:
+     *      SemanticExpression on semantic error
+     */
+
+    private AnnNotExpression analyzeNotExp ( NotExpression exp, Env env )
+    {
+        import std.exception;
+        import std.format;
+
+        auto ann_exp = this.analyzeExpression(exp.exp, env);
+        enforce!SemanticException(ann_exp.type.ident == "Bool", format("Argument of expression %s must be of type Bool", exp));
+
+        return new AnnNotExpression(ann_exp.type, ann_exp);
     }
 
     /**

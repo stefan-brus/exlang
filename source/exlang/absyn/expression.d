@@ -156,6 +156,53 @@ class EqualsExpression : Expression
 }
 
 /**
+ * Assignment expression
+ */
+
+class AssignExpression : Expression
+{
+    /**
+     * The identifier
+     */
+
+    string ident;
+
+    /**
+     * The expression
+     */
+
+    Expression exp;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      ident = The identifer
+     *      exp = The expression
+     */
+
+    this ( string ident, Expression exp )
+    {
+        this.ident = ident;
+        this.exp = exp;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        return format("%s = %s", this.ident, this.exp);
+    }
+}
+
+/**
  * Addition expression
  */
 
@@ -203,13 +250,107 @@ class AddExpression : Expression
 }
 
 /**
+ * Subtraction expression
+ */
+
+class SubExpression : Expression
+{
+    /**
+     * The left expression
+     */
+
+    Expression left;
+
+    /**
+     * The right expression
+     */
+
+    Expression right;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      left = The left expression
+     *      right = The right expression
+     */
+
+    this ( Expression left, Expression right )
+    {
+        this.left = left;
+        this.right = right;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        return format("%s - %s", this.left, this.right);
+    }
+}
+
+/**
+ * Multiplication expression
+ */
+
+class MulExpression : Expression
+{
+    /**
+     * The left expression
+     */
+
+    Expression left;
+
+    /**
+     * The right expression
+     */
+
+    Expression right;
+
+    /**
+     * Constructor
+     *
+     * Params:
+     *      left = The left expression
+     *      right = The right expression
+     */
+
+    this ( Expression left, Expression right )
+    {
+        this.left = left;
+        this.right = right;
+    }
+
+    /**
+     * Convert to string
+     *
+     * Returns:
+     *      The string representation of this expression
+     */
+
+    override string toString ( )
+    {
+        import std.format;
+
+        return format("%s * %s", this.left, this.right);
+    }
+}
+
+/**
  * Not expression
  */
 
 class NotExpression : Expression
 {
     /**
-     * The expression to negate
+     * The expression
      */
 
     Expression exp;
@@ -218,7 +359,7 @@ class NotExpression : Expression
      * Constructor
      *
      * Params:
-     *      exp = The expression to negate
+     *      exp = The expression
      */
 
     this ( Expression exp )

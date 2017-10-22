@@ -427,7 +427,15 @@ class Parser
 
             case Equals:
                 enforce!ParseException(left !is null, "Invalid token: Equals");
-                result = this.parseEqualsExpression(left);
+                switch ( next.type )
+                {
+                    case Equals:
+                        result = this.parseEqualsExpression(left);
+                        break;
+
+                    default:
+                        result = this.parseAssignExpression(left);
+                }
                 break;
 
             case Plus:
@@ -435,8 +443,18 @@ class Parser
                 result = this.parseAddExpression(left);
                 break;
 
+            case Dash:
+                enforce!ParseException(left !is null, "Invalid token: Dash");
+                result = this.parseSubExpression(left);
+                break;
+
+            case Star:
+                enforce!ParseException(left !is null, "Invalid token: Star");
+                result = this.parseMulExpression(left);
+                break;
+
             case Exclamation:
-                result = this.parseNotExpression(left);
+                result = this.parseNotExpression();
                 break;
 
             case Tilde:
@@ -513,6 +531,37 @@ class Parser
     }
 
     /**
+     * Parse an assign expression
+     *
+     * Params:
+     *      left = The left expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private AssignExpression parseAssignExpression ( Expression left )
+    in
+    {
+        assert(left !is null);
+    }
+    body
+    {
+        import std.exception;
+        import std.format;
+
+        enforce!ParseException(cast(IdentExpression)left !is null,
+            format("Can only assign to identifiers, not: %s", left));
+
+        auto exp = this.parseExpression();
+
+        return new AssignExpression((cast(IdentExpression)left).ident, exp);
+    }
+
+    /**
      * Parse an add expression
      *
      * Params:
@@ -538,7 +587,7 @@ class Parser
     }
 
     /**
-     * Parse a not expression
+     * Parse a sub expression
      *
      * Params:
      *      left = The left expression
@@ -550,7 +599,54 @@ class Parser
      *      ParseException on unexpected token
      */
 
-    private NotExpression parseNotExpression ( Expression left )
+    private SubExpression parseSubExpression ( Expression left )
+    in
+    {
+        assert(left !is null);
+    }
+    body
+    {
+        auto right = this.parseExpression();
+
+        return new SubExpression(left, right);
+    }
+
+    /**
+     * Parse a mul expression
+     *
+     * Params:
+     *      left = The left expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private MulExpression parseMulExpression ( Expression left )
+    in
+    {
+        assert(left !is null);
+    }
+    body
+    {
+        auto right = this.parseExpression();
+
+        return new MulExpression(left, right);
+    }
+
+    /**
+     * Parse a not expression
+     *
+     * Returns:
+     *      The parsed expression
+     *
+     * Throws:
+     *      ParseException on unexpected token
+     */
+
+    private NotExpression parseNotExpression ( )
     {
         auto exp = this.parseExpression();
 
